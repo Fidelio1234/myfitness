@@ -114,7 +114,7 @@ export default function ProgressiPT() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                     <XAxis dataKey="data" tick={{ fontSize: 11, fill: "#aaa" }} />
                     <YAxis tick={{ fontSize: 11, fill: "#aaa" }} />
-                    <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid #333", color: "#fff" }} />
+                    <Tooltip contentStyle={{ background: "#f5f5f5", border: "1px solid #333", color: "#fff" }} />
                     <Legend />
                     <Line type="monotone" dataKey="peso" stroke="#e63946" strokeWidth={2} name="Peso usato (kg)" dot={{ r: 4 }} activeDot={{ r: 6 }} />
                     <Line type="monotone" dataKey="rip" stroke="#4a90d9" strokeWidth={2} name="Ripetizioni" dot={{ r: 4 }} activeDot={{ r: 6 }} />
@@ -161,21 +161,21 @@ export default function ProgressiPT() {
 
 const styles = {
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" },
-  titolo: { color: "#fff", fontSize: "1.6rem", fontWeight: "800", margin: 0 },
-  sezione: { background: "#1a1a1a", borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem" },
-  label: { color: "#aaa", fontSize: "0.85rem", marginBottom: "0.8rem", display: "block" },
-  select: { width: "100%", padding: "0.8rem", borderRadius: "8px", border: "1px solid #333", background: "#111", color: "#fff", fontSize: "0.95rem", marginBottom: "1rem" },
+  titolo: { color: "#1a1a1a", fontSize: "1.6rem", fontWeight: "800", margin: 0 },
+  sezione: { background: "#e8f4fd", borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", border: "1px solid #b3d9f5" },
+  label: { color: "#2e86c1", fontSize: "0.85rem", marginBottom: "0.8rem", display: "block", fontWeight: "600" },
+  select: { width: "100%", padding: "0.8rem", borderRadius: "8px", border: "1px solid #85c1e9", background: "#fff", color: "#1a1a2e", fontSize: "0.95rem", marginBottom: "1rem" },
   loading: { color: "#aaa", textAlign: "center", padding: "2rem" },
   vuoto: { color: "#555", textAlign: "center", padding: "2rem" },
   stats: { display: "flex", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" },
-  statCard: { flex: 1, minWidth: "120px", background: "#1a1a1a", borderRadius: "12px", padding: "1.2rem", textAlign: "center", border: "1px solid #222" },
-  statNum: { color: "#e63946", fontSize: "2rem", fontWeight: "800", margin: 0 },
-  statLabel: { color: "#aaa", fontSize: "0.8rem", marginTop: "0.3rem" },
-  sessioneCard: { background: "#111", borderRadius: "10px", padding: "1rem", marginBottom: "0.8rem", border: "1px solid #222" },
+  statCard: { flex: 1, minWidth: "120px", background: "#e8f4fd", borderRadius: "12px", padding: "1.2rem", textAlign: "center", border: "1px solid #b3d9f5" },
+  statNum: { color: "#2e86c1", fontSize: "2rem", fontWeight: "800", margin: 0 },
+  statLabel: { color: "#5d8aa8", fontSize: "0.8rem", marginTop: "0.3rem" },
+  sessioneCard: { background: "#fff", borderRadius: "10px", padding: "1rem", marginBottom: "0.8rem", border: "1px solid #b3d9f5" },
   sessioneHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" },
-  sessioneData: { color: "#fff", fontWeight: "700", fontSize: "0.85rem", margin: 0, textTransform: "capitalize" },
-  sessioneGiorno: { color: "#e63946", fontSize: "0.8rem", fontWeight: "700" },
-  pesoCorporeo: { color: "#aaa", fontSize: "0.82rem", marginBottom: "0.5rem" },
+  sessioneData: { color: "#1a5276", fontWeight: "700", fontSize: "0.85rem", margin: 0, textTransform: "capitalize" },
+  sessioneGiorno: { color: "#2e86c1", fontSize: "0.8rem", fontWeight: "700" },
+  pesoCorporeo: { color: "#5d8aa8", fontSize: "0.82rem", marginBottom: "0.5rem" },
   eserciziList: { display: "flex", flexDirection: "column", gap: "0.3rem" },
   exRow: { display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.4rem 0.6rem", borderRadius: "6px", fontSize: "0.82rem" },
   exCompletato: { background: "#0d1f0d" },

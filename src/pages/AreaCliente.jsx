@@ -7,6 +7,12 @@ import StoricoCliente from "./StoricoCliente";
 
 const GIORNI = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
 
+function getImgSrc(ex) {
+  if (ex.immagineBase64) return ex.immagineBase64;
+  if (ex.immagineUrl) return ex.immagineUrl;
+  return null;
+}
+
 export default function AreaCliente() {
   const [cliente, setCliente] = useState(null);
   const [scheda, setScheda] = useState(null);
@@ -17,6 +23,7 @@ export default function AreaCliente() {
   const [loading, setLoading] = useState(true);
   const [salvato, setSalvato] = useState(false);
   const [tab, setTab] = useState("oggi");
+  const [descrizioneAperta, setDescrizioneAperta] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +60,10 @@ export default function AreaCliente() {
       ...prev,
       [esIndex]: { ...(prev[esIndex] || {}), [campo]: valore }
     }));
+  }
+
+  function toggleDescrizione(index) {
+    setDescrizioneAperta(prev => prev === index ? null : index);
   }
 
   async function salvaAllenamento() {
@@ -131,7 +142,7 @@ export default function AreaCliente() {
                   {GIORNI.filter(g => scheda.scheda[g]?.length > 0).map(g => (
                     <button key={g}
                       style={{ ...styles.giornoBtn, ...(giornoSelezionato === g ? styles.giornoBtnActive : {}) }}
-                      onClick={() => { setGiornoSelezionato(g); setCompletati({}); setLogEsercizi({}); }}>
+                      onClick={() => { setGiornoSelezionato(g); setCompletati({}); setLogEsercizi({}); setDescrizioneAperta(null); }}>
                       {g.slice(0, 3)}
                     </button>
                   ))}
@@ -154,13 +165,31 @@ export default function AreaCliente() {
                   {eserciziOggi.map((ex, i) => (
                     <div key={i} style={{ ...styles.esercizioCard, ...(completati[i] ? styles.esercizioCompletato : {}) }}>
                       <div style={styles.esercizioHeader}>
-                        <img src={ex.gifUrl} alt={ex.nome} style={styles.gif} />
+                        {getImgSrc(ex) && (
+                          <img src={getImgSrc(ex)} alt={ex.nome} style={styles.exImmagine} />
+                        )}
                         <div style={{ flex: 1 }}>
                           <p style={styles.exNome}>{ex.nome}</p>
                           <p style={styles.exInfo}>
                             {ex.serie} serie · {ex.ripetizioni} rip · {ex.peso}kg · {ex.recupero}sec
                           </p>
                           {ex.note && <p style={styles.exNote}>📝 {ex.note}</p>}
+
+                          {/* Bottone descrizione */}
+                          {ex.descrizione && (
+                            <button
+                              style={styles.btnDescrizione}
+                              onClick={() => toggleDescrizione(i)}
+                            >
+                              {descrizioneAperta === i ? "▲ Nascondi istruzioni" : "▼ Vedi istruzioni"}
+                            </button>
+                          )}
+                          {/* Testo descrizione espandibile */}
+                          {ex.descrizione && descrizioneAperta === i && (
+                            <div style={styles.descrizioneBox}>
+                              <p style={styles.descrizioneText}>📖 {ex.descrizione}</p>
+                            </div>
+                          )}
                         </div>
                         <button
                           style={{ ...styles.checkBtn, ...(completati[i] ? styles.checkBtnDone : {}) }}
@@ -240,10 +269,13 @@ const styles = {
   esercizioCard: { background: "#fff", borderRadius: "12px", padding: "1rem", marginBottom: "1rem", border: "2px solid #eee", transition: "border 0.2s", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" },
   esercizioCompletato: { border: "2px solid #4caf50", background: "#f0faf0" },
   esercizioHeader: { display: "flex", alignItems: "flex-start", gap: "0.8rem", marginBottom: "1rem" },
-  gif: { width: "64px", height: "64px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 },
   exNome: { color: "#111", fontWeight: "700", fontSize: "0.95rem", margin: 0, textTransform: "capitalize" },
   exInfo: { color: "#888", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
   exNote: { color: "#f4a261", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
+  btnDescrizione: { background: "transparent", border: "none", color: "#4a90d9", fontSize: "0.78rem", cursor: "pointer", padding: "0.3rem 0", fontWeight: "600", marginTop: "0.3rem" },
+  descrizioneBox: { background: "#f0f5ff", borderRadius: "8px", padding: "0.8rem", marginTop: "0.5rem", border: "1px solid #d0e4ff" },
+  descrizioneText: { color: "#333", fontSize: "0.82rem", lineHeight: "1.6", margin: 0 },
+  exImmagine: { width: "72px", height: "72px", objectFit: "cover", borderRadius: "8px", flexShrink: 0, border: "1px solid #eee" },
   checkBtn: { width: "36px", height: "36px", borderRadius: "50%", border: "2px solid #ccc", background: "transparent", color: "#aaa", fontSize: "1rem", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800" },
   checkBtnDone: { border: "2px solid #4caf50", background: "#4caf50", color: "#fff" },
   logRow: { display: "flex", gap: "0.5rem" },

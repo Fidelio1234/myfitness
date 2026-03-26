@@ -6,6 +6,7 @@ import { useTheme } from "../App";
 import GestioneClienti from "./GestioneClienti";
 import GestioneSchede from "./GestioneSchede";
 import ProgressiPT from "./ProgressiPT";
+import GestioneEsercizi from "./GestioneEsercizi";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -27,6 +28,9 @@ export default function Dashboard() {
           <button style={{ ...styles.navBtn, ...(sezione === "clienti" ? styles.navBtnActive : {}) }} onClick={() => setSezione("clienti")}>
             👤 Clienti
           </button>
+          <button style={{ ...styles.navBtn, ...(sezione === "esercizi" ? styles.navBtnActive : {}) }} onClick={() => setSezione("esercizi")}>
+            💪 Esercizi
+          </button>
           <button style={{ ...styles.navBtn, ...(sezione === "schede" ? styles.navBtnActive : {}) }} onClick={() => setSezione("schede")}>
             📋 Schede
           </button>
@@ -47,6 +51,7 @@ export default function Dashboard() {
           </>
         )}
         {sezione === "clienti" && <GestioneClienti />}
+        {sezione === "esercizi" && <GestioneEsercizi />}
         {sezione === "schede" && <GestioneSchede />}
         {sezione === "progressi" && <ProgressiPT />}
       </div>
