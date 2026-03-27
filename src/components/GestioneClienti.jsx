@@ -10,11 +10,16 @@ function generaPassword(length = 10) {
 
 function calcolaEta(dataNascita) {
     if (!dataNascita) return "";
+    // Supporta sia "YYYY-MM-DD" che oggetti Date
+    const parti = String(dataNascita).split("-");
+    if (parti.length !== 3) return "";
+    const anno = parseInt(parti[0], 10);
+    const mese = parseInt(parti[1], 10) - 1;
+    const giorno = parseInt(parti[2], 10);
+    if (isNaN(anno) || isNaN(mese) || isNaN(giorno)) return "";
     const oggi = new Date();
-    const nascita = new Date(dataNascita + "T00:00:00");
-    let eta = oggi.getFullYear() - nascita.getFullYear();
-    const m = oggi.getMonth() - nascita.getMonth();
-    if (m < 0 || (m === 0 && oggi.getDate() < nascita.getDate())) eta--;
+    let eta = oggi.getFullYear() - anno;
+    if (oggi.getMonth() < mese || (oggi.getMonth() === mese && oggi.getDate() < giorno)) eta--;
     return eta;
   }
 

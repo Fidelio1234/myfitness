@@ -18,9 +18,7 @@ export const temi = {
     testo: "#111111", testoSub: "#666", bordo: "#ddd", accent: "#e63946"
   }
 };
-
-const PT_EMAIL = "dmivanlecce@gmail.com";
-
+const PT_EMAILS = ["dmivanlucce@gmail.com", "manuel@myfit.com"];
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
   return currentUser ? children : <Navigate to="/" />;
@@ -29,7 +27,8 @@ function PrivateRoute({ children }) {
 function RootRedirect() {
   const { currentUser } = useAuth();
   if (!currentUser) return <Login />;
-  if (currentUser.email === PT_EMAIL) return <Navigate to="/dashboard" />;
+  if (PT_EMAILS.includes(currentUser.email)) return <Navigate to="/dashboard" />;
+  //if (currentUser.email === PT_EMAIL) return <Navigate to="/dashboard" />;
   return <Navigate to="/cliente" />;
 }
 
