@@ -18,7 +18,7 @@ export const temi = {
     testo: "#111111", testoSub: "#666", bordo: "#ddd", accent: "#e63946"
   }
 };
-const PT_EMAILS = ["dmivanlucce@gmail.com", "manuel@myfit.com"];
+const PT_EMAILS = ["dmivanlecce@gmail.com", "manuel@myfit.com"];
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
   return currentUser ? children : <Navigate to="/" />;
