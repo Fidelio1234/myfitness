@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -24,11 +24,12 @@ export default function AreaCliente() {
   const [salvato, setSalvato] = useState(false);
   const [tab, setTab] = useState("oggi");
   const [descrizioneAperta, setDescrizioneAperta] = useState(null);
+  const [timer, setTimer] = useState({}); // { [index]: secondi_rimanenti }
+  const [timerAttivo, setTimerAttivo] = useState({}); // { [index]: true/false }
+  const intervalRef = useRef({});
   const navigate = useNavigate();
 
-  useEffect(() => {
-    init();
-  }, []);
+  useEffect(() => { init(); }, []);
 
   async function init() {
     const email = auth.currentUser?.email;
@@ -47,7 +48,6 @@ export default function AreaCliente() {
     const oggi = new Date().getDay();
     const mapGiorno = [6, 0, 1, 2, 3, 4, 5];
     setGiornoSelezionato(GIORNI[mapGiorno[oggi]]);
-
     setLoading(false);
   }
 
@@ -60,6 +60,43 @@ export default function AreaCliente() {
       ...prev,
       [esIndex]: { ...(prev[esIndex] || {}), [campo]: valore }
     }));
+  }
+
+  function playBip() {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 1);
+  }
+
+  function avviaTimer(index, secondi) {
+    if (intervalRef.current[index]) clearInterval(intervalRef.current[index]);
+    const sec = parseInt(secondi) > 0 ? parseInt(secondi) : 60;
+    setTimer(prev => ({ ...prev, [index]: sec }));
+    setTimerAttivo(prev => ({ ...prev, [index]: true }));
+    let remaining = sec;
+    intervalRef.current[index] = setInterval(() => {
+      remaining -= 1;
+      setTimer(prev => ({ ...prev, [index]: remaining }));
+      if (remaining <= 0) {
+        clearInterval(intervalRef.current[index]);
+        setTimerAttivo(prev => ({ ...prev, [index]: false }));
+        playBip();
+      }
+    }, 1000);
+  }
+
+  function resetTimer(index, secondi) {
+    if (intervalRef.current[index]) clearInterval(intervalRef.current[index]);
+    setTimerAttivo(prev => ({ ...prev, [index]: false }));
+    setTimer(prev => ({ ...prev, [index]: parseInt(secondi) || 60 }));
   }
 
   function toggleDescrizione(index) {
@@ -104,7 +141,6 @@ export default function AreaCliente() {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <div style={styles.header}>
         <div>
           <p style={styles.benvenuto}>Ciao, {cliente?.nome} 👋</p>
@@ -113,7 +149,6 @@ export default function AreaCliente() {
         <button style={styles.logoutBtn} onClick={handleLogout}>Esci</button>
       </div>
 
-      {/* Nessuna scheda */}
       {!scheda && (
         <div style={styles.noScheda}>
           <p>⏳ Il tuo PT non ha ancora creato una scheda per te.</p>
@@ -122,7 +157,6 @@ export default function AreaCliente() {
 
       {scheda && (
         <>
-          {/* Tab navigazione */}
           <div style={styles.tabBar}>
             <button style={{ ...styles.tabBtn, ...(tab === "oggi" ? styles.tabBtnActive : {}) }} onClick={() => setTab("oggi")}>
               🏋️ Oggi
@@ -132,10 +166,8 @@ export default function AreaCliente() {
             </button>
           </div>
 
-          {/* TAB OGGI */}
           {tab === "oggi" && (
             <>
-              {/* Selezione giorno */}
               <div style={styles.sezione}>
                 <p style={styles.label}>Seleziona giorno</p>
                 <div style={styles.giorni}>
@@ -149,14 +181,12 @@ export default function AreaCliente() {
                 </div>
               </div>
 
-              {/* Peso corporeo */}
               <div style={styles.sezione}>
                 <p style={styles.label}>⚖️ Il tuo peso oggi (kg)</p>
                 <input style={styles.input} type="number" placeholder="Es. 75.5"
                   value={pesoCorporeo} onChange={e => setPesoCorporeo(e.target.value)} />
               </div>
 
-              {/* Esercizi del giorno */}
               {eserciziOggi.length === 0 ? (
                 <div style={styles.noScheda}><p>Nessun esercizio per {giornoSelezionato}.</p></div>
               ) : (
@@ -164,10 +194,14 @@ export default function AreaCliente() {
                   <p style={styles.titoloGiorno}>{giornoSelezionato}</p>
                   {eserciziOggi.map((ex, i) => (
                     <div key={i} style={{ ...styles.esercizioCard, ...(completati[i] ? styles.esercizioCompletato : {}) }}>
+
+                      {/* Immagine in primo piano, tutta larghezza */}
+                      {getImgSrc(ex) && (
+                        <img src={getImgSrc(ex)} alt={ex.nome} style={styles.exImmagine} />
+                      )}
+
+                      {/* Riga testo + check */}
                       <div style={styles.esercizioHeader}>
-                        {getImgSrc(ex) && (
-                          <img src={getImgSrc(ex)} alt={ex.nome} style={styles.exImmagine} />
-                        )}
                         <div style={{ flex: 1 }}>
                           <p style={styles.exNome}>{ex.nome}</p>
                           <p style={styles.exInfo}>
@@ -175,16 +209,25 @@ export default function AreaCliente() {
                           </p>
                           {ex.note && <p style={styles.exNote}>📝 {ex.note}</p>}
 
-                          {/* Bottone descrizione */}
+                          {/* Cronometro recupero */}
+                          {ex.recupero !== undefined && (
+                            <div style={styles.timerBox}>
+                              <span style={styles.timerDisplay}>
+                                ⏱ {timer[i] !== undefined ? `${Math.floor(timer[i] / 60).toString().padStart(2,"0")}:${(timer[i] % 60).toString().padStart(2,"0")}` : `${Math.floor(parseInt(ex.recupero) / 60).toString().padStart(2,"0")}:${(parseInt(ex.recupero) % 60).toString().padStart(2,"0")}`}
+                              </span>
+                              <div style={styles.timerBtns}>
+                                <button style={{ ...styles.timerBtn, ...(timerAttivo[i] ? styles.timerBtnStop : styles.timerBtnStart) }}
+                                  onClick={() => timerAttivo[i] ? resetTimer(i, ex.recupero) : avviaTimer(i, ex.recupero)}>
+                                  {timerAttivo[i] ? "■ Stop" : "▶ Start"}
+                                </button>
+                              </div>
+                            </div>
+                          )}
                           {ex.descrizione && (
-                            <button
-                              style={styles.btnDescrizione}
-                              onClick={() => toggleDescrizione(i)}
-                            >
+                            <button style={styles.btnDescrizione} onClick={() => toggleDescrizione(i)}>
                               {descrizioneAperta === i ? "▲ Nascondi istruzioni" : "▼ Vedi istruzioni"}
                             </button>
                           )}
-                          {/* Testo descrizione espandibile */}
                           {ex.descrizione && descrizioneAperta === i && (
                             <div style={styles.descrizioneBox}>
                               <p style={styles.descrizioneText}>📖 {ex.descrizione}</p>
@@ -237,7 +280,6 @@ export default function AreaCliente() {
             </>
           )}
 
-          {/* TAB STORICO */}
           {tab === "storico" && cliente && (
             <StoricoCliente clienteId={cliente.id} />
           )}
@@ -266,22 +308,28 @@ const styles = {
   giornoBtn: { padding: "0.6rem 1rem", borderRadius: "8px", border: "1px solid #ddd", background: "#fff", color: "#666", cursor: "pointer", fontSize: "0.85rem", fontWeight: "600" },
   giornoBtnActive: { background: "#e63946", color: "#fff", border: "1px solid #e63946" },
   titoloGiorno: { color: "#111", fontWeight: "800", fontSize: "1.1rem", marginBottom: "1rem" },
-  esercizioCard: { background: "#fff", borderRadius: "12px", padding: "1rem", marginBottom: "1rem", border: "2px solid #eee", transition: "border 0.2s", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" },
+  esercizioCard: { background: "#fff", borderRadius: "12px", overflow: "hidden", marginBottom: "1rem", border: "2px solid #eee", transition: "border 0.2s", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" },
   esercizioCompletato: { border: "2px solid #4caf50", background: "#f0faf0" },
-  esercizioHeader: { display: "flex", alignItems: "flex-start", gap: "0.8rem", marginBottom: "1rem" },
+  exImmagine: { width: "100%", height: "280px", objectFit: "contain", display: "block", background: "#111" },
+  esercizioHeader: { display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem", paddingBottom: "0" },
   exNome: { color: "#111", fontWeight: "700", fontSize: "0.95rem", margin: 0, textTransform: "capitalize" },
   exInfo: { color: "#888", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
   exNote: { color: "#f4a261", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
   btnDescrizione: { background: "transparent", border: "none", color: "#4a90d9", fontSize: "0.78rem", cursor: "pointer", padding: "0.3rem 0", fontWeight: "600", marginTop: "0.3rem" },
   descrizioneBox: { background: "#f0f5ff", borderRadius: "8px", padding: "0.8rem", marginTop: "0.5rem", border: "1px solid #d0e4ff" },
   descrizioneText: { color: "#333", fontSize: "0.82rem", lineHeight: "1.6", margin: 0 },
-  exImmagine: { width: "72px", height: "72px", objectFit: "cover", borderRadius: "8px", flexShrink: 0, border: "1px solid #eee" },
   checkBtn: { width: "36px", height: "36px", borderRadius: "50%", border: "2px solid #ccc", background: "transparent", color: "#aaa", fontSize: "1rem", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800" },
   checkBtnDone: { border: "2px solid #4caf50", background: "#4caf50", color: "#fff" },
-  logRow: { display: "flex", gap: "0.5rem" },
+  logRow: { display: "flex", gap: "0.5rem", padding: "1rem" },
   logField: { flex: 1, display: "flex", flexDirection: "column" },
   btnSalva: { width: "100%", padding: "1rem", background: "#e63946", color: "#fff", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: "800", fontSize: "1rem", marginTop: "1rem" },
   btnSalvaCompleto: { background: "#4caf50" },
   successBox: { background: "#f0faf0", border: "1px solid #4caf50", borderRadius: "10px", padding: "1rem", marginTop: "1rem", color: "#2e7d32", textAlign: "center", fontWeight: "700" },
-  noScheda: { background: "#f5f5f5", borderRadius: "12px", padding: "2rem", textAlign: "center", color: "#888" }
+  noScheda: { background: "#f5f5f5", borderRadius: "12px", padding: "2rem", textAlign: "center", color: "#888" },
+  timerBox: { display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f0f0f0", borderRadius: "8px", padding: "0.5rem 0.8rem", marginTop: "0.6rem" },
+  timerDisplay: { fontSize: "1.1rem", fontWeight: "800", color: "#111", fontVariantNumeric: "tabular-nums" },
+  timerBtns: { display: "flex", gap: "0.4rem" },
+  timerBtn: { padding: "0.3rem 0.8rem", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "700", fontSize: "0.8rem" },
+  timerBtnStart: { background: "#e63946", color: "#fff" },
+  timerBtnStop: { background: "#555", color: "#fff" }
 };
