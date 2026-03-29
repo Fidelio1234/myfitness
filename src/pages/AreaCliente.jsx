@@ -27,9 +27,19 @@ export default function AreaCliente() {
   const [timer, setTimer] = useState({}); // { [index]: secondi_rimanenti }
   const [timerAttivo, setTimerAttivo] = useState({}); // { [index]: true/false }
   const intervalRef = useRef({});
+  const audioCtxRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => { init(); }, []);
+
+  function initAudio() {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume();
+    }
+  }
 
   async function init() {
     const email = auth.currentUser?.email;
@@ -63,7 +73,8 @@ export default function AreaCliente() {
   }
 
   function playBip() {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    initAudio();
+    const ctx = audioCtxRef.current;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -217,7 +228,7 @@ export default function AreaCliente() {
                               </span>
                               <div style={styles.timerBtns}>
                                 <button style={{ ...styles.timerBtn, ...(timerAttivo[i] ? styles.timerBtnStop : styles.timerBtnStart) }}
-                                  onClick={() => timerAttivo[i] ? resetTimer(i, ex.recupero) : avviaTimer(i, ex.recupero)}>
+                                  onClick={() => { initAudio(); timerAttivo[i] ? resetTimer(i, ex.recupero) : avviaTimer(i, ex.recupero); }}>
                                   {timerAttivo[i] ? "■ Stop" : "▶ Start"}
                                 </button>
                               </div>
