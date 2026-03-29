@@ -303,7 +303,7 @@ const styles = {
   exImmagine: { width: "100%", height: "250px", objectFit: "cover", display: "block", background: "#111" },
   esercizioHeader: { display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem", paddingBottom: "0" },
   exNome: { color: "#111", fontWeight: "700", fontSize: "0.95rem", margin: 0, textTransform: "capitalize" },
-  exInfo: { color: "#888", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
+  exInfo: { color: "#888", fontSize: "0.9rem", fontWeight: "700", margin: "0.3rem 0 0 0" },
   exNote: { color: "#f4a261", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
   timerBox: { display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f0f0f0", borderRadius: "8px", padding: "0.5rem 0.8rem", marginTop: "0.6rem" },
   timerDisplay: { fontSize: "1.1rem", fontWeight: "800", color: "#111", fontVariantNumeric: "tabular-nums" },
