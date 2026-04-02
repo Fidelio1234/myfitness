@@ -206,26 +206,6 @@ export default function AreaCliente() {
                           <p style={styles.exInfo}>{ex.serie} serie · {ex.ripetizioni} rip · {ex.peso}kg · {ex.recupero}sec</p>
                           {ex.note && <p style={styles.exNote}>📝 {ex.note}</p>}
 
-                          {/* Cronometro */}
-                          {ex.recupero !== undefined && (
-                            <div style={styles.timerBox}>
-                              <span style={styles.timerDisplay}>
-                                ⏱ {(() => {
-                                  const sec = timer[i] !== undefined ? timer[i] : (parseInt(ex.recupero) > 0 ? parseInt(ex.recupero) : 60);
-                                  return `${Math.floor(sec / 60).toString().padStart(2,"0")}:${(sec % 60).toString().padStart(2,"0")}`;
-                                })()}
-                              </span>
-                              <button
-                                style={{ ...styles.timerBtn, ...(timerAttivo[i] ? styles.timerBtnStop : styles.timerBtnStart) }}
-                                onClick={() => {
-                                  sbloccaAudio(); // sblocca audio al tap su iOS
-                                  timerAttivo[i] ? resetTimer(i, ex.recupero) : avviaTimer(i, ex.recupero);
-                                }}>
-                                {timerAttivo[i] ? "■ Stop" : "▶ Start"}
-                              </button>
-                            </div>
-                          )}
-
                           {ex.descrizione && (
                             <button style={styles.btnDescrizione} onClick={() => toggleDescrizione(i)}>
                               {descrizioneAperta === i ? "▲ Nascondi istruzioni" : "▼ Vedi istruzioni"}
@@ -243,6 +223,26 @@ export default function AreaCliente() {
                           {completati[i] ? "✓" : "○"}
                         </button>
                       </div>
+
+                      {/* Cronometro fuori dall'header */}
+                      {ex.recupero !== undefined && (
+                        <div style={styles.timerBox}>
+                          <span style={styles.timerDisplay}>
+                            ⏱ {(() => {
+                              const sec = timer[i] !== undefined ? timer[i] : (parseInt(ex.recupero) > 0 ? parseInt(ex.recupero) : 60);
+                              return `${Math.floor(sec / 60).toString().padStart(2,"0")}:${(sec % 60).toString().padStart(2,"0")}`;
+                            })()}
+                          </span>
+                          <button
+                            style={{ ...styles.timerBtn, ...(timerAttivo[i] ? styles.timerBtnStop : styles.timerBtnStart) }}
+                            onClick={() => {
+                              sbloccaAudio();
+                              timerAttivo[i] ? resetTimer(i, ex.recupero) : avviaTimer(i, ex.recupero);
+                            }}>
+                            {timerAttivo[i] ? "■ Stop" : "▶ Start"}
+                          </button>
+                        </div>
+                      )}
 
                       <div style={styles.serieContainer}>
                         {Array.from({ length: parseInt(ex.serie) || 1 }).map((_, s) => (
@@ -318,12 +318,12 @@ const styles = {
   exNome: { color: "#111", fontWeight: "700", fontSize: "0.95rem", margin: 0, textTransform: "capitalize" },
   exInfo: { color: "#888", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
   exNote: { color: "#f4a261", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
-  timerBox: { display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f0f0f0", borderRadius: "8px", padding: "0.5rem 0.8rem", marginTop: "0.6rem" },
-  timerDisplay: { fontSize: "1.1rem", fontWeight: "800", color: "#111", fontVariantNumeric: "tabular-nums" },
-  timerBtn: { padding: "0.3rem 0.8rem", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "700", fontSize: "0.8rem" },
+  timerBox: { display: "flex", alignItems: "center", justifyContent: "space-between", background: "#111", borderRadius: "5px", padding: "0.7rem 1rem", marginTop: "0.8rem", marginBottom: "0.8rem" },
+  timerDisplay: { fontSize: "1.6rem", fontWeight: "900", color: "#fff", fontFamily: "monospace", letterSpacing: "2px" },
+  timerBtn: { padding: "0.4rem 1.2rem", borderRadius: "20px", border: "none", cursor: "pointer", fontWeight: "700", fontSize: "0.85rem" },
   timerBtnStart: { background: "#e63946", color: "#fff" },
   timerBtnStop: { background: "#555", color: "#fff" },
-  btnDescrizione: { background: "transparent", border: "none", color: "#4a90d9", fontSize: "0.78rem", cursor: "pointer", padding: "0.3rem 0", fontWeight: "600", marginTop: "0.3rem" },
+  btnDescrizione: { background: "transparent", border: "none", color: "black", fontSize: "0.9rem", cursor: "pointer", padding: "0.3rem 0", fontWeight: "600", marginTop: "0.3rem" },
   descrizioneBox: { background: "#f0f5ff", borderRadius: "8px", padding: "0.8rem", marginTop: "0.5rem", border: "1px solid #d0e4ff" },
   descrizioneText: { color: "#333", fontSize: "0.82rem", lineHeight: "1.6", margin: 0 },
   checkBtn: { width: "36px", height: "36px", borderRadius: "50%", border: "2px solid #ccc", background: "transparent", color: "#aaa", fontSize: "1rem", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800" },
