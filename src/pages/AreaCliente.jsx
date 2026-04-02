@@ -54,11 +54,12 @@ export default function AreaCliente() {
     setCompletati(prev => ({ ...prev, [esIndex]: !prev[esIndex] }));
   }
 
-  function aggiornaLog(esIndex, campo, valore) {
-    setLogEsercizi(prev => ({
-      ...prev,
-      [esIndex]: { ...(prev[esIndex] || {}), [campo]: valore }
-    }));
+  function aggiornaLog(esIndex, serieIndex, campo, valore) {
+    setLogEsercizi(prev => {
+      const exLog = prev[esIndex] ? [...prev[esIndex]] : [];
+      exLog[serieIndex] = { ...(exLog[serieIndex] || {}), [campo]: valore };
+      return { ...prev, [esIndex]: exLog };
+    });
   }
 
   function toggleDescrizione(index) {
@@ -121,9 +122,11 @@ export default function AreaCliente() {
       esercizi: esercizi.map((ex, i) => ({
         nome: ex.nome,
         completato: completati[i] || false,
-        pesoUsato: logEsercizi[i]?.peso || null,
-        ripetizioniEseguite: logEsercizi[i]?.rip || null,
-        note: logEsercizi[i]?.note || ""
+        serie: (logEsercizi[i] || []).map(s => ({
+          pesoUsato: s?.peso || null,
+          ripetizioniEseguite: s?.rip || null,
+          note: s?.note || ""
+        }))
       }))
     });
     setSalvato(true);
@@ -241,22 +244,32 @@ export default function AreaCliente() {
                         </button>
                       </div>
 
-                      <div style={styles.logRow}>
-                        <div style={styles.logField}>
-                          <label style={styles.labelSmall}>Peso usato (kg)</label>
-                          <input style={styles.inputSmall} type="number" placeholder={ex.peso}
-                            value={logEsercizi[i]?.peso || ""} onChange={e => aggiornaLog(i, "peso", e.target.value)} />
-                        </div>
-                        <div style={styles.logField}>
-                          <label style={styles.labelSmall}>Ripetizioni fatte</label>
-                          <input style={styles.inputSmall} type="number" placeholder={ex.ripetizioni}
-                            value={logEsercizi[i]?.rip || ""} onChange={e => aggiornaLog(i, "rip", e.target.value)} />
-                        </div>
-                        <div style={styles.logField}>
-                          <label style={styles.labelSmall}>Note</label>
-                          <input style={styles.inputSmall} type="text" placeholder="Come ti sei sentito?"
-                            value={logEsercizi[i]?.note || ""} onChange={e => aggiornaLog(i, "note", e.target.value)} />
-                        </div>
+                      <div style={styles.serieContainer}>
+                        {Array.from({ length: parseInt(ex.serie) || 1 }).map((_, s) => (
+                          <div key={s} style={styles.serieRow}>
+                            <span style={styles.serieLabel}>Serie {s + 1}</span>
+                            <div style={styles.serieInputs}>
+                              <div style={styles.logField}>
+                                <label style={styles.labelSmall}>Peso (kg)</label>
+                                <input style={styles.inputSmall} type="number" placeholder={ex.peso}
+                                  value={logEsercizi[i]?.[s]?.peso || ""}
+                                  onChange={e => aggiornaLog(i, s, "peso", e.target.value)} />
+                              </div>
+                              <div style={styles.logField}>
+                                <label style={styles.labelSmall}>Rip. fatte</label>
+                                <input style={styles.inputSmall} type="number" placeholder={ex.ripetizioni}
+                                  value={logEsercizi[i]?.[s]?.rip || ""}
+                                  onChange={e => aggiornaLog(i, s, "rip", e.target.value)} />
+                              </div>
+                              <div style={styles.logField}>
+                                <label style={styles.labelSmall}>Note</label>
+                                <input style={styles.inputSmall} type="text" placeholder="..."
+                                  value={logEsercizi[i]?.[s]?.note || ""}
+                                  onChange={e => aggiornaLog(i, s, "note", e.target.value)} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
@@ -303,7 +316,7 @@ const styles = {
   exImmagine: { width: "100%", height: "250px", objectFit: "cover", display: "block", background: "#111" },
   esercizioHeader: { display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem", paddingBottom: "0" },
   exNome: { color: "#111", fontWeight: "700", fontSize: "0.95rem", margin: 0, textTransform: "capitalize" },
-  exInfo: { color: "#888", fontSize: "0.9rem", fontWeight: "700", margin: "0.3rem 0 0 0" },
+  exInfo: { color: "#888", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
   exNote: { color: "#f4a261", fontSize: "0.78rem", margin: "0.3rem 0 0 0" },
   timerBox: { display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f0f0f0", borderRadius: "8px", padding: "0.5rem 0.8rem", marginTop: "0.6rem" },
   timerDisplay: { fontSize: "1.1rem", fontWeight: "800", color: "#111", fontVariantNumeric: "tabular-nums" },
@@ -312,9 +325,13 @@ const styles = {
   timerBtnStop: { background: "#555", color: "#fff" },
   btnDescrizione: { background: "transparent", border: "none", color: "#4a90d9", fontSize: "0.78rem", cursor: "pointer", padding: "0.3rem 0", fontWeight: "600", marginTop: "0.3rem" },
   descrizioneBox: { background: "#f0f5ff", borderRadius: "8px", padding: "0.8rem", marginTop: "0.5rem", border: "1px solid #d0e4ff" },
-  descrizioneText: { color: "#333", fontSize: "0.95rem", lineHeight: "1.6", margin: 0 },
+  descrizioneText: { color: "#333", fontSize: "0.82rem", lineHeight: "1.6", margin: 0 },
   checkBtn: { width: "36px", height: "36px", borderRadius: "50%", border: "2px solid #ccc", background: "transparent", color: "#aaa", fontSize: "1rem", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800" },
   checkBtnDone: { border: "2px solid #4caf50", background: "#4caf50", color: "#fff" },
+  serieContainer: { padding: "0 1rem 1rem 1rem" },
+  serieRow: { marginBottom: "0.8rem" },
+  serieLabel: { display: "block", fontSize: "0.78rem", fontWeight: "800", color: "#e63946", marginBottom: "0.3rem" },
+  serieInputs: { display: "flex", gap: "0.5rem" },
   logRow: { display: "flex", gap: "0.5rem", padding: "1rem" },
   logField: { flex: 1, display: "flex", flexDirection: "column" },
   btnSalva: { width: "100%", padding: "1rem", background: "#e63946", color: "#fff", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: "800", fontSize: "1rem", marginTop: "1rem" },
