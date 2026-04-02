@@ -325,7 +325,7 @@ const styles = {
   timerBtnStop: { background: "#555", color: "#fff" },
   btnDescrizione: { background: "transparent", border: "none", color: "black", fontSize: "0.9rem", cursor: "pointer", padding: "0.3rem 0", fontWeight: "600", marginTop: "0.3rem" },
   descrizioneBox: { background: "#f0f5ff", borderRadius: "8px", padding: "0.8rem", marginTop: "0.5rem", border: "1px solid #d0e4ff" },
-  descrizioneText: { color: "#333", fontSize: "0.82rem", lineHeight: "1.6", margin: 0 },
+  descrizioneText: { color: "#333", fontSize: "1rem", lineHeight: "1.6", margin: 0 },
   checkBtn: { width: "36px", height: "36px", borderRadius: "50%", border: "2px solid #ccc", background: "transparent", color: "#aaa", fontSize: "1rem", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800" },
   checkBtnDone: { border: "2px solid #4caf50", background: "#4caf50", color: "#fff" },
   serieContainer: { padding: "0 1rem 1rem 1rem" },
