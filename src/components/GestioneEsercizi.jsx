@@ -3,9 +3,9 @@ import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "firebase
 import { db } from "../firebase";
 
 const GRUPPI_MUSCOLARI = [
-  "Petto", "Schiena", "Spalle", "Bicipiti", "Tricipiti",
+  "Adduttori", "Petto", "Schiena", "Spalle", "Bicipiti", "Tricipiti",
   "Avambracci", "Addome", "Glutei", "Quadricipiti", "Femorali",
-  "Polpacci", "Cardio", "Corpo libero"
+  "Polpacci", "Cardio", "Corpo libero,", 
 ];
 
 const initialForm = { nome: "", gruppoMuscolare: "", descrizione: "" };
